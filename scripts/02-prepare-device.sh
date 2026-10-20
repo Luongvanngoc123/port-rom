@@ -6,6 +6,15 @@ set -euo pipefail
 WORK="${1:-$HOME/pe13}"
 DEV="$WORK/device/samsung/gtowifi"
 [ -d "$DEV" ] || { echo "$DEV not found, run 01-sync.sh first"; exit 1; }
+
+# 0. vendor_gms is removed in gto.xml (its gitlab host is gone) but vendor/aosp inherits it
+#    unconditionally. Make that optional. `repo sync --force-sync` reverts this, so rerun the script after it.
+COMMON="$WORK/vendor/aosp/config/common.mk"
+[ -f "$COMMON" ] || { echo "$COMMON not found, run 01-sync.sh first"; exit 1; }
+sed -i 's#\$(call inherit-product, vendor/gms/products/gms.mk)#$(call inherit-product-if-exists, vendor/gms/products/gms.mk)#' "$COMMON"
+grep -q 'inherit-product-if-exists, vendor/gms/products/gms.mk' "$COMMON" \
+  || { echo "GMS patch did not apply to $COMMON, vendor/aosp changed upstream?"; exit 1; }
+
 cd "$DEV"
 
 # 1. Product makefile: lineage_gtowifi -> aosp_gtowifi. PRODUCT_DEVICE stays gtowifi because

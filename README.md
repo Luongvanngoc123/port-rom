@@ -23,7 +23,7 @@ PE không có device tree cho máy này, nên dùng tree **LineageOS 20 (Android
 | HAL Qualcomm `msm8953` (audio, display, media) | `LineageOS/android_hardware_qcom_*` nhánh `lineage-20.0-caf-msm8953` |
 
 `local_manifests/gto.xml` khai báo các repo trên. `scripts/02-prepare-device.sh` đổi device tree từ
-`lineage_gtowifi` sang `aosp_gtowifi`.
+`lineage_gtowifi` sang `aosp_gtowifi` và vá `vendor/aosp` để bỏ qua GMS (xem bên dưới).
 
 ## Yêu cầu máy build
 
@@ -38,14 +38,20 @@ Container Claude Code không đủ tài nguyên, nên phải build trên máy ri
 ```bash
 git clone https://github.com/Luongvanngoc123/port-rom && cd port-rom
 scripts/01-sync.sh ~/pe13              # repo init + sync (vài giờ)
-scripts/02-prepare-device.sh ~/pe13    # lineage_gtowifi -> aosp_gtowifi
+scripts/02-prepare-device.sh ~/pe13    # lineage_gtowifi -> aosp_gtowifi, vá vendor/aosp bỏ GMS
 scripts/03-build.sh ~/pe13 userdebug   # build, log nằm ở ~/pe13/build-userdebug.log
 ```
 
-Kết quả nằm trong `~/pe13/out/target/product/gtowifi/`.
+Kết quả nằm trong `~/pe13/out/target/product/gtowifi/`. Chạy lại `02` sau mỗi lần `repo sync --force-sync`,
+vì lệnh đó hoàn nguyên bản vá trong `vendor/aosp`.
 
-Hai repo PE nằm trên `gitlab.pixelexperience.org` (`vendor_gms`, `external_faceunlock`). Nếu máy bạn không
-vào được host đó, `repo sync` sẽ lỗi ở hai repo này, xem mục "Lỗi thường gặp" trong tài liệu port.
+## Bản build không có GMS
+
+Hai repo PE `vendor_gms` và `external_faceunlock` nằm trên `gitlab.pixelexperience.org`, host này không còn
+phân giải DNS (kiểm tra 2026-10-20), nên `repo sync` không lấy được. `gto.xml` gỡ cả hai bằng `remove-project`,
+và `02-prepare-device.sh` đổi dòng `inherit-product vendor/gms/products/gms.mk` trong `vendor/aosp` thành
+`inherit-product-if-exists`. Kết quả là ROM **không có Google Play Services và không có Face Unlock**
+(Face Unlock vốn đã tắt bằng `TARGET_FACE_UNLOCK_SUPPORTED := false`). Cài MindTheGapps sau nếu cần GApps.
 
 ## Lưu ý với SM-T295 (LTE)
 

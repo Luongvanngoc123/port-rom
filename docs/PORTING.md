@@ -7,8 +7,12 @@
 | Các nhánh trong `gto.xml` tồn tại trên remote | Đã kiểm tra bằng `git ls-remote` (2026-10-20) |
 | Device tree lineage-20 chỉ phụ thuộc `vendor/lineage` ở một dòng (`inherit-product`) và thư mục `overlay-lineage` | Đã grep toàn bộ tree, đọc `BoardConfig.mk`, `Android.mk` và phần lớn `device.mk` |
 | PE ánh xạ `msm8937` + QSSI sang `QCOM_HARDWARE_VARIANT := msm8953` | Đã đọc `vendor/aosp/config/BoardConfigQcom.mk` |
-| `02-prepare-device.sh` | Đã chạy thử trên bản sao của tree, chạy hai lần cho kết quả giống nhau |
-| `repo sync` và build thật | **Chưa chạy** |
+| `02-prepare-device.sh` | Đã chạy thử trên bản sao của device tree và `vendor/aosp` (nhánh `thirteen-plus`), chạy hai lần cho kết quả giống nhau; báo lỗi và dừng nếu dòng GMS trong `common.mk` không còn |
+| `gitlab.pixelexperience.org` | Không phân giải DNS (2026-10-20), kiểm tra cả từ máy cá nhân lẫn Google Colab; `vendor_gms` và `external_faceunlock` không có bản sao trên GitHub của PixelExperience |
+| `inherit-product-if-exists` có trong build system | Đã đọc `build/make/core/product.mk` tại `android-13.0.0_r75` |
+| `repo init` + gộp `gto.xml` vào manifest PE | Đã chạy trên Colab: ra 1171 project, đủ 7 project của `gto.xml`, không báo lỗi |
+| `repo sync` và build thật | **Chưa chạy.** Colab (2 CPU, 12 GB RAM, ~88 GB ổ trống) không đủ cho bản build này |
+| Bản không GMS có qua được toàn bộ bước build | **Chưa thử** |
 | Máy khởi động, Wi‑Fi, âm thanh, camera, cảm biến | **Chưa thử** |
 
 ## Điểm dễ lỗi khi build
@@ -31,11 +35,11 @@
 
 ## Lỗi thường gặp
 
-- **`repo sync` lỗi ở `external_faceunlock` hoặc `vendor_gms`**: hai repo này nằm trên
-  `gitlab.pixelexperience.org`. Nếu host không truy cập được, tạm xoá hai dòng đó bằng
-  `<remove-project name="external_faceunlock" />` và `<remove-project name="vendor_gms" />` trong `gto.xml`
-  để build bản không có GMS, rồi cài MindTheGapps sau. Cách này **chưa thử**: `vendor/aosp` có thể vẫn
-  tham chiếu hai thư mục đó và cần sửa thêm. Chỉ làm vậy khi bạn chấp nhận build không có GMS.
+- **Build báo thiếu `vendor/gms` hoặc `external/faceunlock`**: `gto.xml` đã gỡ hai repo này (host gitlab của PE
+  không còn). Nếu lỗi `vendor/gms/products/gms.mk` vẫn xuất hiện, bản vá của `02-prepare-device.sh` chưa được
+  áp dụng, thường do `repo sync --force-sync` vừa hoàn nguyên `vendor/aosp`. Chạy lại `02`.
+  Nếu một module khác cũng tham chiếu `vendor/gms` hoặc `external/faceunlock`, xoá phần tham chiếu đó
+  (chỉ mới kiểm tra `vendor/aosp` và device tree, chưa kiểm tra toàn bộ source).
 - **Hết RAM khi link**: thêm swap hoặc giảm `-j`.
 
 ## SIM và 4G trên T295

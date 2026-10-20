@@ -11,6 +11,14 @@
   <!-- hardware/samsung is a real project here, so the nested AOSP nfc project must go -->
   <remove-project name="platform/hardware/samsung/nfc" />
 
+  <!--
+    These two live on gitlab.pixelexperience.org, which no longer resolves (NXDOMAIN, checked 2026-10-20),
+    so `repo sync` cannot fetch them. The build is therefore without GMS and without face unlock.
+    scripts/02-prepare-device.sh makes vendor/aosp tolerate the missing vendor/gms.
+  -->
+  <remove-project name="external_faceunlock" />
+  <remove-project name="vendor_gms" />
+
   <!-- Device, kernel, vendor blobs -->
   <project path="device/samsung/gtowifi" name="android_device_samsung_gtowifi" remote="lineage" revision="lineage-20" />
   <project path="kernel/samsung/sdm429" name="android_kernel_samsung_sdm429" remote="lineage" revision="lineage-20" />
