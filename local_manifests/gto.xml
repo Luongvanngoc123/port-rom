@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Local manifest: Pixel Experience 13 (thirteen-plus) for Samsung Galaxy Tab A 8.0 2019.
+  Device base is the official LineageOS 20 tree for SM-T290 (gtowifi), ported to the PE source.
+  Every revision below was checked with `git ls-remote` on 2026-10-20.
+-->
+<manifest>
+  <remote name="lineage" fetch="https://github.com/LineageOS" />
+  <remote name="muppets" fetch="https://github.com/TheMuppets" />
+
+  <!-- hardware/samsung is a real project here, so the nested AOSP nfc project must go -->
+  <remove-project name="platform/hardware/samsung/nfc" />
+
+  <!-- Device, kernel, vendor blobs -->
+  <project path="device/samsung/gtowifi" name="android_device_samsung_gtowifi" remote="lineage" revision="lineage-20" />
+  <project path="kernel/samsung/sdm429" name="android_kernel_samsung_sdm429" remote="lineage" revision="lineage-20" />
+  <project path="vendor/samsung/gtowifi" name="proprietary_vendor_samsung_gtowifi" remote="muppets" revision="lineage-20" />
+
+  <!-- Samsung HALs (light, power, sensors...) from PE, so nothing depends on LineageOS here -->
+  <project path="hardware/samsung" name="hardware_samsung" remote="pixel" revision="thirteen" />
+
+  <!--
+    SDM429 is msm8937. PE (QSSI + UM_4_9_LEGACY_FAMILY) maps it to hardware/qcom-caf/msm8953,
+    but PE ships no HAL fork for that family, so take LineageOS's A13 CAF branch.
+    This is the part most likely to need patches. See docs/PORTING.md.
+  -->
+  <project path="hardware/qcom-caf/msm8953/audio" name="android_hardware_qcom_audio" remote="lineage" revision="lineage-20.0-caf-msm8953" />
+  <project path="hardware/qcom-caf/msm8953/display" name="android_hardware_qcom_display" remote="lineage" revision="lineage-20.0-caf-msm8953" />
+  <project path="hardware/qcom-caf/msm8953/media" name="android_hardware_qcom_media" remote="lineage" revision="lineage-20.0-caf-msm8953" />
+</manifest>
